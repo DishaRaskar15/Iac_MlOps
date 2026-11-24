@@ -1,0 +1,575 @@
+
+=== Format ===
+terraform fmt -recursive
+
+=== Init ===
+terraform init
+Initializing the backend...
+
+Initializing provider plugins...
+- Finding hashicorp/local versions matching "~> 2.5"...
+- Installing hashicorp/local v2.9.1...
+- Installed hashicorp/local v2.9.1 (signed by HashiCorp)
+
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+=== Validate ===
+terraform validate
+Success! The configuration is valid.
+
+
+=== Plan ===
+terraform plan -out=tfplan
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # local_file.compute_resource_definition will be created
+  + resource "local_file" "compute_resource_definition" {
+      + content              = jsonencode(
+            {
+              + cpu         = "1"
+              + environment = "development"
+              + image       = "mlops-p13-registry/inference-api:latest"
+              + kind        = "container-workload"
+              + memory      = "1Gi"
+              + name        = "mlops-p13-inference"
+              + purpose     = "Run ML training and inference workloads"
+              + tags        = {
+                  + environment = "development"
+                  + managed_by  = "terraform-local"
+                  + project     = "mlops-p13"
+                }
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/compute/mlops-p13-inference.json"
+      + id                   = (known after apply)
+    }
+
+  # local_file.container_registry_definition will be created
+  + resource "local_file" "container_registry_definition" {
+      + content              = jsonencode(
+            {
+              + image_names = [
+                  + "training-worker",
+                  + "inference-api",
+                ]
+              + name        = "mlops-p13-registry"
+              + purpose     = "Container images for ML training and inference"
+              + tags        = {
+                  + environment = "development"
+                  + managed_by  = "terraform-local"
+                  + project     = "mlops-p13"
+                }
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/registry/mlops-p13-registry.json"
+      + id                   = (known after apply)
+    }
+
+  # local_file.iam_policy_definition will be created
+  + resource "local_file" "iam_policy_definition" {
+      + content              = jsonencode(
+            {
+              + note        = "Local-provider policy definition only; no IAM principal or permissions are created in a cloud account."
+              + policy      = {
+                  + Statement = [
+                      + {
+                          + Action   = [
+                              + "s3:ListBucket",
+                              + "s3:GetObject",
+                              + "s3:PutObject",
+                            ]
+                          + Effect   = "Allow"
+                          + Resource = [
+                              + "arn:local:s3:::mlops-p13-artifacts",
+                              + "arn:local:s3:::mlops-p13-artifacts/*",
+                            ]
+                        },
+                      + {
+                          + Action   = [
+                              + "registry:PullImage",
+                              + "registry:PushImage",
+                            ]
+                          + Effect   = "Allow"
+                          + Resource = [
+                              + "registry:local:mlops-p13-registry",
+                            ]
+                        },
+                    ]
+                  + Version   = "2012-10-17"
+                }
+              + policy_name = "mlops-p13-development-ml-platform-access"
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/iam/ml-platform-policy.json"
+      + id                   = (known after apply)
+    }
+
+  # local_file.iam_role_definition will be created
+  + resource "local_file" "iam_role_definition" {
+      + content              = jsonencode(
+            {
+              + role_name    = "mlops-p13-development-ml-platform"
+              + tags         = {
+                  + environment = "development"
+                  + managed_by  = "terraform-local"
+                  + project     = "mlops-p13"
+                }
+              + trust_policy = {
+                  + Statement = [
+                      + {
+                          + Action    = "sts:AssumeRole"
+                          + Effect    = "Allow"
+                          + Principal = {
+                              + Service = [
+                                  + "training.mlops-p13.local",
+                                  + "inference.mlops-p13.local",
+                                ]
+                            }
+                        },
+                    ]
+                  + Version   = "2012-10-17"
+                }
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/iam/ml-platform-role.json"
+      + id                   = (known after apply)
+    }
+
+  # local_file.sample_dataset will be created
+  + resource "local_file" "sample_dataset" {
+      + content              = <<-EOT
+            sample_id,feature_a,feature_b,label
+            1,0.12,3.4,0
+            2,0.87,1.2,1
+            3,0.45,2.1,0
+        EOT
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/storage/mlops-p13-artifacts/datasets/sample.csv"
+      + id                   = (known after apply)
+    }
+
+  # local_file.sample_model_artifact will be created
+  + resource "local_file" "sample_model_artifact" {
+      + content              = <<-EOT
+            Sample model artifact placeholder.
+            Replace this file with a trained model artifact (for example, model.pkl or model.onnx).
+            This local-provider exercise stores only this descriptive text; it does not package model binaries.
+        EOT
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/storage/mlops-p13-artifacts/artifacts/README.txt"
+      + id                   = (known after apply)
+    }
+
+  # local_file.storage_bucket_configuration will be created
+  + resource "local_file" "storage_bucket_configuration" {
+      + content              = jsonencode(
+            {
+              + environment = "development"
+              + layout      = [
+                  + "datasets/",
+                  + "artifacts/",
+                ]
+              + name        = "mlops-p13-artifacts"
+              + purpose     = "ML datasets and model artifacts"
+              + region      = "local"
+              + tags        = {
+                  + environment = "development"
+                  + managed_by  = "terraform-local"
+                  + project     = "mlops-p13"
+                }
+              + versioning  = {
+                  + enabled = true
+                }
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "./generated/mlops-p13/storage/mlops-p13-artifacts/bucket-config.json"
+      + id                   = (known after apply)
+    }
+
+Plan: 7 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + compute_resource_definition_path   = "./generated/mlops-p13/compute/mlops-p13-inference.json"
+  + container_registry_definition_path = "./generated/mlops-p13/registry/mlops-p13-registry.json"
+  + iam_definition_paths               = [
+      + "./generated/mlops-p13/iam/ml-platform-role.json",
+      + "./generated/mlops-p13/iam/ml-platform-policy.json",
+    ]
+  + sample_artifact_path               = "./generated/mlops-p13/storage/mlops-p13-artifacts/artifacts/README.txt"
+  + sample_dataset_path                = "./generated/mlops-p13/storage/mlops-p13-artifacts/datasets/sample.csv"
+  + storage_layout_path                = "./generated/mlops-p13/storage/mlops-p13-artifacts"
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "tfplan"
+
+=== Apply ===
+terraform apply tfplan
+local_file.container_registry_definition: Creating...
+local_file.iam_role_definition: Creating...
+local_file.compute_resource_definition: Creating...
+local_file.iam_policy_definition: Creating...
+local_file.sample_model_artifact: Creating...
+local_file.storage_bucket_configuration: Creating...
+local_file.sample_dataset: Creating...
+local_file.iam_policy_definition: Creation complete after 0s [id=a596cdbc980736c4502e9fc0a388d2e650429941]
+local_file.container_registry_definition: Creation complete after 0s [id=430542c78a23d897797578f26aa0ca2c9f025f05]
+local_file.sample_dataset: Creation complete after 0s [id=18bb73563442316a20641f70a63ba41aa56dc838]
+local_file.iam_role_definition: Creation complete after 0s [id=e0498efd892b8783f79b88c5b82b6c1a3d92abae]
+local_file.compute_resource_definition: Creation complete after 0s [id=8b8458512324c65e00dac4a61efe9ce27a1eee3c]
+local_file.storage_bucket_configuration: Creation complete after 0s [id=d8f9da84d3e921b6058918824443dae7d2ae2c42]
+local_file.sample_model_artifact: Creation complete after 0s [id=72d4d4be86417bd5e4a71a3ba276dcc91b21bae1]
+
+Apply complete! Resources: 7 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+compute_resource_definition_path = "./generated/mlops-p13/compute/mlops-p13-inference.json"
+container_registry_definition_path = "./generated/mlops-p13/registry/mlops-p13-registry.json"
+iam_definition_paths = [
+  "./generated/mlops-p13/iam/ml-platform-role.json",
+  "./generated/mlops-p13/iam/ml-platform-policy.json",
+]
+sample_artifact_path = "./generated/mlops-p13/storage/mlops-p13-artifacts/artifacts/README.txt"
+sample_dataset_path = "./generated/mlops-p13/storage/mlops-p13-artifacts/datasets/sample.csv"
+storage_layout_path = "./generated/mlops-p13/storage/mlops-p13-artifacts"
+
+=== Destroy ===
+terraform destroy -auto-approve
+local_file.iam_role_definition: Refreshing state... [id=e0498efd892b8783f79b88c5b82b6c1a3d92abae]
+local_file.compute_resource_definition: Refreshing state... [id=8b8458512324c65e00dac4a61efe9ce27a1eee3c]
+local_file.container_registry_definition: Refreshing state... [id=430542c78a23d897797578f26aa0ca2c9f025f05]
+local_file.sample_dataset: Refreshing state... [id=18bb73563442316a20641f70a63ba41aa56dc838]
+local_file.iam_policy_definition: Refreshing state... [id=a596cdbc980736c4502e9fc0a388d2e650429941]
+local_file.sample_model_artifact: Refreshing state... [id=72d4d4be86417bd5e4a71a3ba276dcc91b21bae1]
+local_file.storage_bucket_configuration: Refreshing state... [id=d8f9da84d3e921b6058918824443dae7d2ae2c42]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # local_file.compute_resource_definition will be destroyed
+  - resource "local_file" "compute_resource_definition" {
+      - content              = jsonencode(
+            {
+              - cpu         = "1"
+              - environment = "development"
+              - image       = "mlops-p13-registry/inference-api:latest"
+              - kind        = "container-workload"
+              - memory      = "1Gi"
+              - name        = "mlops-p13-inference"
+              - purpose     = "Run ML training and inference workloads"
+              - tags        = {
+                  - environment = "development"
+                  - managed_by  = "terraform-local"
+                  - project     = "mlops-p13"
+                }
+            }
+        ) -> null
+      - content_base64sha256 = "RNl4h6BJM4FHUAYcdima/tIKO7JK23WBeiMQ40JFOxE=" -> null
+      - content_base64sha512 = "G/qv1K3C5Wxcn2heSlTPO/J+ALJ6mdt9hnTpyja5EeHpIgMKclPpedkxV+8ZvopXSgn60s4Y7xQ+dpswyILLug==" -> null
+      - content_md5          = "d38b49fbbe7d87e9b3441a7d3bbed2e3" -> null
+      - content_sha1         = "8b8458512324c65e00dac4a61efe9ce27a1eee3c" -> null
+      - content_sha256       = "44d97887a04933814750061c76299afed20a3bb24adb75817a2310e342453b11" -> null
+      - content_sha512       = "1bfaafd4adc2e56c5c9f685e4a54cf3bf27e00b27a99db7d8674e9ca36b911e1e922030a7253e979d93157ef19be8a574a09fad2ce18ef143e769b30c882cbba" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/compute/mlops-p13-inference.json" -> null
+      - id                   = "8b8458512324c65e00dac4a61efe9ce27a1eee3c" -> null
+    }
+
+  # local_file.container_registry_definition will be destroyed
+  - resource "local_file" "container_registry_definition" {
+      - content              = jsonencode(
+            {
+              - image_names = [
+                  - "training-worker",
+                  - "inference-api",
+                ]
+              - name        = "mlops-p13-registry"
+              - purpose     = "Container images for ML training and inference"
+              - tags        = {
+                  - environment = "development"
+                  - managed_by  = "terraform-local"
+                  - project     = "mlops-p13"
+                }
+            }
+        ) -> null
+      - content_base64sha256 = "yIw6CnyIISOy3AlDpgqjSnbQ/qMWZeY1fU/e7I0McNY=" -> null
+      - content_base64sha512 = "1jj9QFex63ZFV3//qhQYxpSULWPxP4qw6RpfXrHkxDI3k+iQDpI+ISIFss9dabumfTkKR+ioWKCi0Y2IALwJNg==" -> null
+      - content_md5          = "bc5b7cc4e0359ea153f305484b0065f9" -> null
+      - content_sha1         = "430542c78a23d897797578f26aa0ca2c9f025f05" -> null
+      - content_sha256       = "c88c3a0a7c882123b2dc0943a60aa34a76d0fea31665e6357d4fdeec8d0c70d6" -> null
+      - content_sha512       = "d638fd4057b1eb7645577fffaa1418c694942d63f13f8ab0e91a5f5eb1e4c4323793e8900e923e212205b2cf5d69bba67d390a47e8a858a0a2d18d8800bc0936" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/registry/mlops-p13-registry.json" -> null
+      - id                   = "430542c78a23d897797578f26aa0ca2c9f025f05" -> null
+    }
+
+  # local_file.iam_policy_definition will be destroyed
+  - resource "local_file" "iam_policy_definition" {
+      - content              = jsonencode(
+            {
+              - note        = "Local-provider policy definition only; no IAM principal or permissions are created in a cloud account."
+              - policy      = {
+                  - Statement = [
+                      - {
+                          - Action   = [
+                              - "s3:ListBucket",
+                              - "s3:GetObject",
+                              - "s3:PutObject",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = [
+                              - "arn:local:s3:::mlops-p13-artifacts",
+                              - "arn:local:s3:::mlops-p13-artifacts/*",
+                            ]
+                        },
+                      - {
+                          - Action   = [
+                              - "registry:PullImage",
+                              - "registry:PushImage",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = [
+                              - "registry:local:mlops-p13-registry",
+                            ]
+                        },
+                    ]
+                  - Version   = "2012-10-17"
+                }
+              - policy_name = "mlops-p13-development-ml-platform-access"
+            }
+        ) -> null
+      - content_base64sha256 = "pNaAV20gjx21Fg8IPn57ydz2h6djEwz09NSIZyLpGXo=" -> null
+      - content_base64sha512 = "opOP67UnsyEyk0sFN1am3PPwq6GG+xLOrkBkpfZvDYEiGUe8znbIxZusLKr/oUkJ2JwSuv3os8+e8ANg9MZSTw==" -> null
+      - content_md5          = "9aa1d097955ab60e755654719676a4b3" -> null
+      - content_sha1         = "a596cdbc980736c4502e9fc0a388d2e650429941" -> null
+      - content_sha256       = "a4d680576d208f1db5160f083e7e7bc9dcf687a763130cf4f4d4886722e9197a" -> null
+      - content_sha512       = "a2938febb527b32132934b053756a6dcf3f0aba186fb12ceae4064a5f66f0d81221947bcce76c8c59bac2caaffa14909d89c12bafde8b3cf9ef00360f4c6524f" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/iam/ml-platform-policy.json" -> null
+      - id                   = "a596cdbc980736c4502e9fc0a388d2e650429941" -> null
+    }
+
+  # local_file.iam_role_definition will be destroyed
+  - resource "local_file" "iam_role_definition" {
+      - content              = jsonencode(
+            {
+              - role_name    = "mlops-p13-development-ml-platform"
+              - tags         = {
+                  - environment = "development"
+                  - managed_by  = "terraform-local"
+                  - project     = "mlops-p13"
+                }
+              - trust_policy = {
+                  - Statement = [
+                      - {
+                          - Action    = "sts:AssumeRole"
+                          - Effect    = "Allow"
+                          - Principal = {
+                              - Service = [
+                                  - "training.mlops-p13.local",
+                                  - "inference.mlops-p13.local",
+                                ]
+                            }
+                        },
+                    ]
+                  - Version   = "2012-10-17"
+                }
+            }
+        ) -> null
+      - content_base64sha256 = "coGO9yMrPq+TXvxHn7Ub7JbpOcZ9EJVe4ARXkw/rjjc=" -> null
+      - content_base64sha512 = "h+7/uC3WQqpP8EbO1TsJca5AG/w2EjY3xSpZ3ki3ud+r60YUwGY8BmmE125YExc1hVxRSggukpaW+T9fdKbrpA==" -> null
+      - content_md5          = "d766e644a6221bc9f2ce93afde1b3d28" -> null
+      - content_sha1         = "e0498efd892b8783f79b88c5b82b6c1a3d92abae" -> null
+      - content_sha256       = "72818ef7232b3eaf935efc479fb51bec96e939c67d10955ee00457930feb8e37" -> null
+      - content_sha512       = "87eeffb82dd642aa4ff046ced53b0971ae401bfc36123637c52a59de48b7b9dfabeb4614c0663c066984d76e58131735855c514a082e929696f93f5f74a6eba4" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/iam/ml-platform-role.json" -> null
+      - id                   = "e0498efd892b8783f79b88c5b82b6c1a3d92abae" -> null
+    }
+
+  # local_file.sample_dataset will be destroyed
+  - resource "local_file" "sample_dataset" {
+      - content              = <<-EOT
+            sample_id,feature_a,feature_b,label
+            1,0.12,3.4,0
+            2,0.87,1.2,1
+            3,0.45,2.1,0
+        EOT -> null
+      - content_base64sha256 = "V/2VWiDPR7TLuSqFsjWMU3tguqmeWJzp9gsqXXLaVWA=" -> null
+      - content_base64sha512 = "LI7ZykQm0wGhAxlwDMIon4cqzEvtQLdxfeVRIoJk4+u8KYe7g/o5H0hCnvsCzmEv1QrSx2eh+ue9fIR2qSxJig==" -> null
+      - content_md5          = "3456e32846bb25f0a31cbe321b64f524" -> null
+      - content_sha1         = "18bb73563442316a20641f70a63ba41aa56dc838" -> null
+      - content_sha256       = "57fd955a20cf47b4cbb92a85b2358c537b60baa99e589ce9f60b2a5d72da5560" -> null
+      - content_sha512       = "2c8ed9ca4426d301a10319700cc2289f872acc4bed40b7717de551228264e3ebbc2987bb83fa391f48429efb02ce612fd50ad2c767a1fae7bd7c8476a92c498a" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/storage/mlops-p13-artifacts/datasets/sample.csv" -> null
+      - id                   = "18bb73563442316a20641f70a63ba41aa56dc838" -> null
+    }
+
+  # local_file.sample_model_artifact will be destroyed
+  - resource "local_file" "sample_model_artifact" {
+      - content              = <<-EOT
+            Sample model artifact placeholder.
+            Replace this file with a trained model artifact (for example, model.pkl or model.onnx).
+            This local-provider exercise stores only this descriptive text; it does not package model binaries.
+        EOT -> null
+      - content_base64sha256 = "g4704ymUD4FlFPQn4K9npIA1ZNH+1dLuP3LD7wlPfhM=" -> null
+      - content_base64sha512 = "8/ZeHJqbAtsuvqGVwm/dOldTOLPZvVdkRJB/+e5fv7sjBnQ5i9Y4nXRoJK0pxE6rraMLUWnXh116WEiWf7PeaA==" -> null
+      - content_md5          = "9b61b72619d2cf7b2794f722845eb5bd" -> null
+      - content_sha1         = "72d4d4be86417bd5e4a71a3ba276dcc91b21bae1" -> null
+      - content_sha256       = "838ef4e329940f816514f427e0af67a4803564d1fed5d2ee3f72c3ef094f7e13" -> null
+      - content_sha512       = "f3f65e1c9a9b02db2ebea195c26fdd3a575338b3d9bd576444907ff9ee5fbfbb230674398bd6389d746824ad29c44eabada30b5169d7875d7a5848967fb3de68" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/storage/mlops-p13-artifacts/artifacts/README.txt" -> null
+      - id                   = "72d4d4be86417bd5e4a71a3ba276dcc91b21bae1" -> null
+    }
+
+  # local_file.storage_bucket_configuration will be destroyed
+  - resource "local_file" "storage_bucket_configuration" {
+      - content              = jsonencode(
+            {
+              - environment = "development"
+              - layout      = [
+                  - "datasets/",
+                  - "artifacts/",
+                ]
+              - name        = "mlops-p13-artifacts"
+              - purpose     = "ML datasets and model artifacts"
+              - region      = "local"
+              - tags        = {
+                  - environment = "development"
+                  - managed_by  = "terraform-local"
+                  - project     = "mlops-p13"
+                }
+              - versioning  = {
+                  - enabled = true
+                }
+            }
+        ) -> null
+      - content_base64sha256 = "TKol4xUw4D8FdKoVuXQFjk7pDT+2vUrxjL4HDhr7G6k=" -> null
+      - content_base64sha512 = "0wmyBpEzxmC6vOSHyzhWQFwJZ+T7Kp+XmAP07dWHsgDwYg13R8auBIiBD/KqXtach2uyqk1EXzGnlrgBzzu/RA==" -> null
+      - content_md5          = "9c64aa3a7e526ff2de79e1ec4a5c325b" -> null
+      - content_sha1         = "d8f9da84d3e921b6058918824443dae7d2ae2c42" -> null
+      - content_sha256       = "4caa25e31530e03f0574aa15b974058e4ee90d3fb6bd4af18cbe070e1afb1ba9" -> null
+      - content_sha512       = "d309b2069133c660babce487cb3856405c0967e4fb2a9f979803f4edd587b200f0620d7747c6ae0488810ff2aa5ed69c876bb2aa4d445f31a796b801cf3bbf44" -> null
+      - directory_permission = "0777" -> null
+      - file_permission      = "0777" -> null
+      - filename             = "./generated/mlops-p13/storage/mlops-p13-artifacts/bucket-config.json" -> null
+      - id                   = "d8f9da84d3e921b6058918824443dae7d2ae2c42" -> null
+    }
+
+Plan: 0 to add, 0 to change, 7 to destroy.
+
+Changes to Outputs:
+  - compute_resource_definition_path   = "./generated/mlops-p13/compute/mlops-p13-inference.json" -> null
+  - container_registry_definition_path = "./generated/mlops-p13/registry/mlops-p13-registry.json" -> null
+  - iam_definition_paths               = [
+      - "./generated/mlops-p13/iam/ml-platform-role.json",
+      - "./generated/mlops-p13/iam/ml-platform-policy.json",
+    ] -> null
+  - sample_artifact_path               = "./generated/mlops-p13/storage/mlops-p13-artifacts/artifacts/README.txt" -> null
+  - sample_dataset_path                = "./generated/mlops-p13/storage/mlops-p13-artifacts/datasets/sample.csv" -> null
+  - storage_layout_path                = "./generated/mlops-p13/storage/mlops-p13-artifacts" -> null
+local_file.compute_resource_definition: Destroying... [id=8b8458512324c65e00dac4a61efe9ce27a1eee3c]
+local_file.sample_model_artifact: Destroying... [id=72d4d4be86417bd5e4a71a3ba276dcc91b21bae1]
+local_file.sample_dataset: Destroying... [id=18bb73563442316a20641f70a63ba41aa56dc838]
+local_file.storage_bucket_configuration: Destroying... [id=d8f9da84d3e921b6058918824443dae7d2ae2c42]
+local_file.iam_role_definition: Destroying... [id=e0498efd892b8783f79b88c5b82b6c1a3d92abae]
+local_file.container_registry_definition: Destroying... [id=430542c78a23d897797578f26aa0ca2c9f025f05]
+local_file.iam_policy_definition: Destroying... [id=a596cdbc980736c4502e9fc0a388d2e650429941]
+local_file.compute_resource_definition: Destruction complete after 0s
+local_file.sample_dataset: Destruction complete after 0s
+local_file.sample_model_artifact: Destruction complete after 0s
+local_file.storage_bucket_configuration: Destruction complete after 0s
+local_file.iam_role_definition: Destruction complete after 0s
+local_file.container_registry_definition: Destruction complete after 0s
+local_file.iam_policy_definition: Destruction complete after 0s
+
+Destroy complete! Resources: 7 destroyed.
+
+Evidence saved to C:\Users\Disha\mlops_p13\terraform_evidence.txt
